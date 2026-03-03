@@ -312,6 +312,27 @@ Your workflow:
 4. **purchase_a2a** — Send an A2A message with automatic payment.
 """ + _GUIDELINES
 
+_AGENTCORE_PROMPT = """\
+You are a data buying agent. You help users discover and purchase data from \
+sellers using the A2A (Agent-to-Agent) protocol with Nevermined payments.
+
+Sellers are pre-registered at startup. Use list_sellers to see available \
+sellers, their skills, and pricing. Do NOT try to discover sellers by URL — \
+agent card discovery is not available in this environment.
+
+Your workflow:
+1. **list_sellers** — See all registered sellers and their capabilities.
+2. **check_balance** — Check your credit balance and budget.
+3. **purchase_a2a** — Send an A2A message with automatic payment.
+
+Important guidelines:
+- Use list_sellers to see what sellers are available and their costs.
+- Always check the balance before making a purchase.
+- Tell the user the expected cost BEFORE purchasing and confirm they want to proceed.
+- After a purchase, report what was received and the credits spent.
+- If budget limits are exceeded, explain the situation and suggest alternatives.
+- Go directly to purchase_a2a after confirming with the user — do not try to fetch agent cards."""
+
 _HTTP_PROMPT = """\
 You are a data buying agent. You help users discover and purchase data from \
 sellers using the x402 HTTP payment protocol.
@@ -323,6 +344,7 @@ Your workflow:
 """ + _GUIDELINES
 
 _A2A_TOOLS = [list_sellers, discover_agent, check_balance, purchase_a2a]
+_AGENTCORE_TOOLS = [list_sellers, check_balance, purchase_a2a]
 _HTTP_TOOLS = [discover_pricing, check_balance, purchase_data]
 
 
@@ -332,7 +354,8 @@ def create_agent(model, mode: str = "a2a") -> Agent:
     Args:
         model: A Strands-compatible model (OpenAIModel, BedrockModel, etc.)
         mode: Agent mode — "a2a" for A2A marketplace tools (default),
-              "http" for direct x402 HTTP tools.
+              "http" for direct x402 HTTP tools,
+              "agentcore" for AgentCore deployment (no discover_agent).
 
     Returns:
         Configured Strands Agent with buyer tools.
@@ -340,11 +363,14 @@ def create_agent(model, mode: str = "a2a") -> Agent:
     if mode == "a2a":
         tools = _A2A_TOOLS
         prompt = _A2A_PROMPT
+    elif mode == "agentcore":
+        tools = _AGENTCORE_TOOLS
+        prompt = _AGENTCORE_PROMPT
     elif mode == "http":
         tools = _HTTP_TOOLS
         prompt = _HTTP_PROMPT
     else:
-        raise ValueError(f"Invalid mode {mode!r}, must be 'a2a' or 'http'")
+        raise ValueError(f"Invalid mode {mode!r}, must be 'a2a', 'agentcore', or 'http'")
     return Agent(
         model=model,
         tools=tools,

@@ -10,6 +10,19 @@ from payments_py.a2a.payments_client import PaymentsClient
 
 from ..log import get_logger, log
 
+# Pluggable client class — override with set_client_class() for AgentCore
+_client_class = PaymentsClient
+
+
+def set_client_class(cls):
+    """Override the PaymentsClient class used for A2A purchases.
+
+    Call this at startup to inject AgentCorePaymentsClient when running
+    on AgentCore (sends x402 tokens via AgentCore-safe headers).
+    """
+    global _client_class
+    _client_class = cls
+
 
 def _error(message: str) -> dict:
     """Build a standard error response."""
@@ -55,7 +68,7 @@ def purchase_a2a_impl(
     log(_logger, "A2A_CLIENT", "CONNECT",
         f"url={agent_url} plan={plan_id[:12]} agent={agent_id[:12]}")
     try:
-        client = PaymentsClient(
+        client = _client_class(
             agent_base_url=agent_url,
             payments=payments,
             agent_id=agent_id,
