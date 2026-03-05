@@ -25,7 +25,7 @@ load_dotenv()
 
 NVM_API_KEY = os.environ["NVM_API_KEY"]
 NVM_ENVIRONMENT = os.getenv("NVM_ENVIRONMENT", "sandbox")
-NVM_PLAN_ID = os.environ["NVM_PLAN_ID"]
+NVM_PLAN_ID = os.getenv("NVM_PLAN_ID", "pending-registration")
 NVM_AGENT_ID = os.getenv("NVM_AGENT_ID")
 
 payments = Payments.get_instance(
