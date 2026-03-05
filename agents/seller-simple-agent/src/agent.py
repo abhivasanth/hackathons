@@ -33,8 +33,7 @@ PORT = int(os.getenv("PORT", "3000"))
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
 if not OPENAI_API_KEY:
-    print("OPENAI_API_KEY is required. Set it in .env file.")
-    sys.exit(1)
+    print("Warning: OPENAI_API_KEY not set. LLM tools (summarize, research) will fail but search_data will work.")
 
 model = OpenAIModel(
     client_args={"api_key": OPENAI_API_KEY},
