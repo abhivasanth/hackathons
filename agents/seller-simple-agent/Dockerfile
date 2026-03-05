@@ -6,7 +6,7 @@ WORKDIR /app
 RUN pip install --no-cache-dir poetry
 
 # Copy dependency files first for layer caching
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml ./
 
 # Install dependencies (no dev deps, no virtualenv inside container)
 RUN poetry config virtualenvs.create false \
@@ -21,7 +21,7 @@ ENV PORT=8080
 EXPOSE ${PORT}
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:' + __import__('os').getenv('PORT', '8080') + '/.well-known/agent.json')" || exit 1
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:' + __import__('os').getenv('PORT', '8080') + '/health')" || exit 1
 
-# Run the AgentCore-aware A2A server
-CMD ["python", "-m", "src.agent_a2a_agentcore"]
+# Run the plain HTTP/x402 server
+CMD ["python", "-m", "src.agent"]
